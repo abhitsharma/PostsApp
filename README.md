@@ -57,6 +57,21 @@ This separation makes the code more testable, maintainable, and scalable.
 - Handle error states (e.g., network errors)
 - Pull-to-refresh support
 
+## Core Data
+The app uses Core Data for persisting favorite posts.
+Entity: FavoritePostEntity
+Attributes:
+- id (Int64)
+- userId (Int64)
+- title (String)
+- body (String)
+Favorites are mapped into the Post model when used in the UI.
+
+## Assumptions
+- The API always returns valid JSON matching the Post model.
+- Only basic fields (id, userId, title, body) are relevant for this app.
+- Persistence is limited to favorites only, not the entire posts list.
+
 ## Possible Improvements
 - Add unit tests for ViewModels and persistence layer
 - Add UI tests for navigation and state updates
