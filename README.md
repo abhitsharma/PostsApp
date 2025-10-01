@@ -21,10 +21,10 @@ Choose a target device or simulator (e.g., iPhone 15).
 Run the app with Cmd + R.
 
 ## Requirements
-iOS 17.0 or later
-Xcode 16.2 (16C5032a)
-Swift 5.10
-No external dependencies
+- iOS 17.0 or later
+- Xcode 16.2 (16C5032a)
+- Swift 5.10
+- No external dependencies
 
 ## Architecture: MVVM
 The project follows MVVM for separation of concerns:
