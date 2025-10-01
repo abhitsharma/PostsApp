@@ -11,7 +11,7 @@ import Combine
 
 @MainActor
 final class FavoritesViewModel: ObservableObject {
-    @Published private(set) var favorites: [Post] = []
+    @Published var favorites: [Post] = []
     
     private let coreData = CoreDataManager.shared
     private var cancellables = Set<AnyCancellable>()
@@ -48,18 +48,10 @@ final class FavoritesViewModel: ObservableObject {
     
     func addFavorite(_ post: Post) {
         let ctx = coreData.viewContext
-        
-        // Build a fetch request with predicate
         let request: NSFetchRequest<FavoritePostEntity> = FavoritePostEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", post.id)
-        
-        // Check if it already exists
         let count = (try? ctx.count(for: request)) ?? 0
-        if count > 0 {
-            return // already exists, don’t add duplicate
-        }
-        
-        // Insert new favorite
+        if count > 0 { return }
         let entity = FavoritePostEntity(context: ctx)
         entity.id = Int64(post.id)
         entity.userId = Int64(post.userId)
@@ -68,10 +60,12 @@ final class FavoritesViewModel: ObservableObject {
         
         do {
             try ctx.save()
+            Task { await fetchFavorites() }
         } catch {
             print("❌ Failed to save favorite: \(error)")
         }
     }
+
 
     
     /// Remove favorite by post id
@@ -91,10 +85,13 @@ final class FavoritesViewModel: ObservableObject {
     
     /// Toggle favorite state for a Post
     func toggleFavorite(_ post: Post) {
-        if isFavorite(post.id) {
-            removeFavorite(id: post.id)
-        } else {
-            addFavorite(post)
+        Task {
+            if isFavorite(post.id) {
+                removeFavorite(id: post.id)
+            } else {
+                addFavorite(post)
+            }
         }
     }
+
 }

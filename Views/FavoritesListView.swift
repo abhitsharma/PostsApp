@@ -8,8 +8,28 @@
 import SwiftUI
 
 struct FavoritesListView: View {
+    @StateObject private var favoritesVM = FavoritesViewModel()
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationStack {
+            List(favoritesVM.favorites) { post in
+                NavigationLink(destination: PostDetailView(post: post, favoritesVM: favoritesVM)) {
+                    PostRowView(
+                        post: post,
+                        isFavorite: true, // already favorite
+                        onFavoriteToggle: {
+                            favoritesVM.removeFavorite(id: post.id)
+                        }
+                    )
+                }
+            }
+            .navigationTitle("Favorites")
+            .onAppear {
+                Task{
+                    await  favoritesVM.fetchFavorites()
+                }
+            }
+        }
     }
 }
 

@@ -21,16 +21,13 @@ struct PostDetailView: View {
                         Spacer()
                         
                         Button {
-                            if favoritesVM.isFavorite(post.id) {
-                                favoritesVM.removeFavorite(id: post.id)
-                            } else {
-                                favoritesVM.addFavorite(post)
-                            }
+                            favoritesVM.toggleFavorite(post)
                         } label: {
                             Image(systemName: favoritesVM.isFavorite(post.id) ? "heart.fill" : "heart")
                                 .foregroundColor(.red)
                                 .font(.title2)
                         }
+
                     }
                     
                     Text(post.body)
@@ -38,7 +35,7 @@ struct PostDetailView: View {
                         .foregroundColor(.primary)
                 }
                 .padding()
-            }
+            }.toolbar(.hidden, for: .tabBar)
             .navigationTitle("Details")
     }
 }
