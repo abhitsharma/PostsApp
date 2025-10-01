@@ -23,11 +23,11 @@ final class PostsViewModel: ObservableObject {
     private let api = APIService.shared
     private let favoritesVM: FavoritesViewModel
     
-    init(favoritesVM: FavoritesViewModel) {
-        self.favoritesVM = favoritesVM
-        bindFavorites()
-        setupSearch()
-    }
+     init(favoritesVM: FavoritesViewModel) {
+         self.favoritesVM = favoritesVM
+         bindFavorites()
+         setupSearch()
+     }
     
     // MARK: - Fetch
     func fetch() {
@@ -36,7 +36,7 @@ final class PostsViewModel: ObservableObject {
         }
     }
     
-    private func fetchPosts() async {
+     func fetchPosts() async {
         isLoading = true
         errorMessage = nil
         do {
@@ -101,7 +101,7 @@ final class PostsViewModel: ObservableObject {
         // optimistic update locally
         if let idx = allPosts.firstIndex(where: { $0.id == post.id }) {
             var updated = allPosts[idx]
-            updated.isFavorite.toggle()
+            updated.isFavorite?.toggle()
             allPosts[idx] = updated
             applySearchAndPublish()
             // persist via favorites VM

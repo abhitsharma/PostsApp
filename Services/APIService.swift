@@ -15,34 +15,22 @@ enum APIError: Error {
     case unknown(Error)
 }
 
-final class APIService {
+class APIService {
     static let shared = APIService()
-    private init() {}
-    
-    private let postsURL = "https://jsonplaceholder.typicode.com/posts"
-    
-    /// Fetch posts using async/await; throws APIError
+
     func fetchPosts() async throws -> [Post] {
-        guard let url = URL(string: postsURL) else {
-            throw APIError.invalidURL
+        guard let url = URL(string: "https://jsonplaceholder.typicode.com/posts") else {
+            throw URLError(.badURL)
         }
-        let (data, response): (Data, URLResponse)
-        do {
-            (data, response) = try await URLSession.shared.data(from: url)
-        } catch {
-            throw APIError.unknown(error)
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw URLError(.badServerResponse)
         }
-        guard let http = response as? HTTPURLResponse else {
-            throw APIError.badResponse(statusCode: -1)
-        }
-        guard (200..<300).contains(http.statusCode) else {
-            throw APIError.badResponse(statusCode: http.statusCode)
-        }
-        do {
-            let decoded = try JSONDecoder().decode([Post].self, from: data)
-            return decoded
-        } catch {
-            throw APIError.decodingError(error)
-        }
+
+        let decoder = JSONDecoder()
+        let posts = try decoder.decode([Post].self, from: data)
+        return posts
     }
 }
