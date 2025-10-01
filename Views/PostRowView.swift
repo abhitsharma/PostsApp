@@ -12,14 +12,16 @@ struct PostRowView: View {
         let isFavorite: Bool
         let onFavoriteToggle: () -> Void
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(post.title)
                     .font(.headline)
+                    .foregroundColor(.white)
                     .lineLimit(1)
-                Text("User \(post.userId)")
+                
+                Text("User ID: \(post.userId)")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white.opacity(0.8))
             }
             
             Spacer()
@@ -28,9 +30,13 @@ struct PostRowView: View {
                 Image(systemName: isFavorite ? "heart.fill" : "heart")
                     .foregroundColor(.red)
             }
-            .buttonStyle(BorderlessButtonStyle()) // avoid row selection conflicts
+            .buttonStyle(PlainButtonStyle()) // avoid row selection conflicts
         }
-        .padding(.vertical, 4)
+        .padding()
+        .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color(.systemGray6))
+                )
     }
 }
 

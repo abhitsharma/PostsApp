@@ -111,5 +111,6 @@ final class PostsViewModel: ObservableObject {
             favoritesVM.toggleFavorite(post)
         }
     }
+
 }
 

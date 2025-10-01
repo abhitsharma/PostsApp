@@ -19,36 +19,75 @@ struct PostsListView: View {
     
     var body: some View {
         NavigationStack {
-                   VStack {
-                       // Search
-                       TextField("Search posts...", text: $viewModel.searchText)
-                           .textFieldStyle(RoundedBorderTextFieldStyle())
-                           .padding()
-                       
-                       List(viewModel.posts) { post in
-                           NavigationLink(destination: PostDetailView(post: post, favoritesVM: favoritesVM)) {
-                               PostRowView(
-                                   post: post,
-                                   isFavorite: favoritesVM.isFavorite(post.id),
-                                   onFavoriteToggle: {
-                                       if favoritesVM.isFavorite(post.id) {
-                                           favoritesVM.removeFavorite(id: post.id)
-                                       } else {
-                                           favoritesVM.addFavorite(post)
-                                       }
-                                   }
-                               )
-                           }
-                       }
-                   }
-                   .navigationTitle("Posts")
-                   .onAppear {
-                       Task {
-                              await viewModel.fetchPosts()
-                              await favoritesVM.fetchFavorites()
-                          }
-                   }
-               }
+            Group {
+                if viewModel.isLoading {
+                    VStack {
+                        ProgressView()
+                        Text("Loading posts...")
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let error = viewModel.errorMessage {
+                    // Error state
+                    VStack(spacing: 16) {
+                        Text("Failed to load posts")
+                            .font(.headline)
+                        Text(error)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button(action: {
+                            Task { await viewModel.fetchPosts() }
+                        }) {
+                            Text("Retry")
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.blue)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                        .padding(.horizontal)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    VStack {
+                        TextField("Search posts...", text: $viewModel.searchText)
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+                            .padding(.top, 8)
+
+                        ScrollView {
+                            LazyVStack(spacing: 8) {
+                                ForEach(viewModel.posts) { post in
+                                    NavigationLink(
+                                        destination: PostDetailView(post: post, favoritesVM: favoritesVM)
+                                    ) {
+                                        PostRowView(
+                                            post: post,
+                                            isFavorite: favoritesVM.isFavorite(post.id),
+                                            onFavoriteToggle: { favoritesVM.toggleFavorite(post) }
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.vertical, 10)
+                            .padding(.horizontal)
+                        }
+                        .refreshable {
+                            await viewModel.fetchPosts()
+                        }
+                        .background(Color(.systemGroupedBackground))
+                    }
+                }
+            }
+            .navigationTitle("Posts")
+        }
+        .task {
+            if viewModel.posts.isEmpty {
+                await viewModel.fetchPosts()
+            }
+        }
     }
 }
 
